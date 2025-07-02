@@ -69,7 +69,7 @@ code_document_generator_prompt = """write the documentation in google style for 
 - Edge cases
 """
 
-unit_test_case_generator_prompt = """ ou need to write the unit test cases for the user provided function. you don;t need to repeat the same function ,
+unit_test_case_generator_prompt = """you need to write the unit test cases for the user provided function. you don;t need to repeat the same function ,
 just write unittest using unittest framework while covering the following:
 - Basic functionality
 - Edge cases
