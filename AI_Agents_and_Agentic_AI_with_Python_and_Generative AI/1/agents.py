@@ -1,19 +1,22 @@
+### Hack so that we can run this as standalone script if required#####
+import sys
+from pathlib import Path
+
+# Add project root to sys.path
+root_dir = Path(__file__).resolve().parent.parent.parent
+if str(root_dir) not in sys.path:
+    sys.path.insert(0, str(root_dir))
+#####################################################
 import inspect
 import json
 import os
 
 from functools import wraps
 from pathlib import Path
-from typing import List, Dict, Any, get_type_hints, get_origin, get_args
+from typing import List, Dict, Any, Union, get_type_hints, get_origin, get_args
 
-from dotenv import dotenv_values
 from litellm import completion
 
-# Load the .env file from the parent directory
-env_path = Path(__file__).resolve().parents[1] / ".env"
-# load_dotenv(dotenv_path=env_path)
-config = dotenv_values(dotenv_path=env_path)
-os.environ['GEMINI_API_KEY'] = config['GEMINI_API_KEY']
 
 def generate_response(messages: List[Dict]) -> str:
     """Call LLM to get response"""

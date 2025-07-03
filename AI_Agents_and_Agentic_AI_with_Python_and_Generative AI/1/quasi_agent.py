@@ -1,3 +1,12 @@
+### Hack so that we can run this as standalone script if required#####
+import sys
+from pathlib import Path
+
+# Add project root to sys.path
+root_dir = Path(__file__).resolve().parent.parent.parent
+if str(root_dir) not in sys.path:
+    sys.path.insert(0, str(root_dir))
+#####################################################
 """
 or this exercise, you should write a program that uses sequential prompts to generate any Python
 function based on user input. The program should:
@@ -48,14 +57,11 @@ import re
 from pathlib import Path
 from typing import List, Dict
 
-from dotenv import dotenv_values
 from litellm import completion
 
-# Load the .env file from the parent directory
-env_path = Path(__file__).resolve().parents[1] / ".env"
-# load_dotenv(dotenv_path=env_path)
-config = dotenv_values(dotenv_path=env_path)
-os.environ['GEMINI_API_KEY'] = config['GEMINI_API_KEY']
+from utils import config
+
+os.environ['GEMINI_API_KEY'] = config.GEMINI_API_KEY
 
 def generate_response(messages: List[Dict]) -> str:
     """Call LLM to get response"""
