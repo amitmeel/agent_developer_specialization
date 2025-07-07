@@ -15,8 +15,10 @@ from functools import wraps
 from pathlib import Path
 from typing import List, Dict, Any, Union, get_type_hints, get_origin, get_args
 
+from utils import config
 from litellm import completion
 
+os.environ['GEMINI_API_KEY'] = config.GEMINI_API_KEY
 
 def generate_response(messages: List[Dict]) -> str:
     """Call LLM to get response"""
