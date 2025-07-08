@@ -317,57 +317,48 @@ When you are done, terminate the conversation by using the "terminate" tool and 
 """
 }]
 
-# Initialize agent parameters
-iterations = 0
-max_iterations = 10
+
+def run_agent_loop(user_task: str, max_iteration=10):
+    iterations = 0
+    max_iterations = 10
+    memory = [{"role": "user", "content": user_task}]
+
+    while iterations < max_iterations:
+        messages = agent_rules + memory
+
+        response = generate_response(messages=messages, tools=tools)
+
+        if response.choices[0].message.tool_calls:
+            tool = response.choices[0].message.tool_calls[0]
+            tool_name = tool.function.name
+            tool_args = json.loads(tool.function.arguments)
+
+            action = {
+                "tool_name": tool_name,
+                "args": tool_args
+            }
+
+            if tool_name == "terminate":
+                print(f"Termination message: {tool_args['message']}")
+                break
+            elif tool_name in tool_functions:
+                try:
+                    result = {"result": tool_functions[tool_name](**tool_args)}
+                except Exception as e:
+                    result = {"error": f"Error executing {tool_name}: {str(e)}"}
+            else:
+                result = {"error": f"Unknown tool: {tool_name}"}
+
+            print(f"Executing: {tool_name} with args {tool_args}")
+            print(f"Result: {result}")
+            memory.extend([
+                {"role": "assistant", "content": json.dumps(action)},
+                {"role": "user", "content": json.dumps(result)}
+            ])
+        else:
+            result = response.choices[0].message.content
+            print(f"Response: {result}")
+            break
 
 user_task = input("What would you like me to do? ")
-
-memory = [{"role": "user", "content": user_task}]
-
-# The Agent Loop
-while iterations < max_iterations:
-
-    messages = agent_rules + memory
-
-    response = completion(
-        model="openai/gpt-4o",
-        messages=messages,
-        tools=tools,
-        max_tokens=1024
-    )
-
-    # No More Custom Parsing Logic
-    # Dynamic Execution
-    # Automated Function Execution
-    if response.choices[0].message.tool_calls:
-        tool = response.choices[0].message.tool_calls[0]
-        tool_name = tool.function.name
-        tool_args = json.loads(tool.function.arguments)
-
-        action = {
-            "tool_name": tool_name,
-            "args": tool_args
-        }
-
-        if tool_name == "terminate":
-            print(f"Termination message: {tool_args['message']}")
-            break
-        elif tool_name in tool_functions:
-            try:
-                result = {"result": tool_functions[tool_name](**tool_args)}
-            except Exception as e:
-                result = {"error":f"Error executing {tool_name}: {str(e)}"}
-        else:
-            result = {"error": f"Unknown tool: {tool_name}"}
-
-        print(f"Executing: {tool_name} with args {tool_args}")
-        print(f"Result: {result}")
-        memory.extend([
-            {"role": "assistant", "content": json.dumps(action)},
-            {"role": "user", "content": json.dumps(result)}
-        ])
-    else:
-        result = response.choices[0].message.content
-        print(f"Response: {result}")
-        break
+run_agent_loop(user_task)
